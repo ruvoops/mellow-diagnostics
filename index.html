@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1f6658" />
+    <meta
+      name="description"
+      content="mellowの業務負担を14日間記録し、改善ポイントを見つけるための日次診断ツールです。"
+    />
+    <title>mellow 14日間業務診断</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#top" aria-label="mellow 14日間業務診断 トップ">
+          <span class="brand-mark">m</span>
+          <span>
+            <strong>mellow</strong>
+            <small>14日間業務診断</small>
+          </span>
+        </a>
+        <nav aria-label="ページ内メニュー">
+          <a href="#entry">今日の記録</a>
+          <a href="#dashboard">集計</a>
+          <a href="#history">履歴</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <p class="eyebrow">RUVO WORKFLOW CHECK</p>
+          <h1 id="hero-title">1日2分、<br />忙しさを改善できる数字に。</h1>
+          <p class="hero-copy">
+            14日間だけ、営業時間・施術・カルテ・睡眠を記録します。入力内容はこの端末のブラウザ内にのみ保存されます。
+          </p>
+          <a class="primary-button" href="#entry">今日の記録を始める</a>
+        </div>
+        <div class="progress-panel" aria-live="polite">
+          <span class="progress-label">診断の進み具合</span>
+          <strong><span id="progress-count">0</span><small> / 14日</small></strong>
+          <div
+            class="progress-track"
+            role="progressbar"
+            aria-label="診断進捗"
+            aria-valuemin="0"
+            aria-valuemax="14"
+            aria-valuenow="0"
+          >
+            <span id="progress-bar"></span>
+          </div>
+          <p id="progress-message">最初の記録を登録すると診断が始まります。</p>
+        </div>
+      </section>
+
+      <section id="entry" class="section-block" aria-labelledby="entry-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">DAILY CHECK-IN</p>
+            <h2 id="entry-title">今日の記録</h2>
+          </div>
+          <p>分かる範囲で入力してください。後から修正できます。</p>
+        </div>
+
+        <div class="voice-card">
+          <div class="voice-heading">
+            <div>
+              <span class="voice-icon" aria-hidden="true">●</span>
+              <div>
+                <h3>まとめて話して入力</h3>
+                <p>録音データは本ツールに保存しません。ブラウザの音声認識は提供元サービスを利用する場合があります。</p>
+              </div>
+            </div>
+            <button id="voice-button" class="voice-button" type="button">
+              <span aria-hidden="true">🎙</span>
+              <span>音声入力を開始</span>
+            </button>
+          </div>
+          <label for="voice-transcript">認識した内容</label>
+          <textarea
+            id="voice-transcript"
+            rows="4"
+            placeholder="例：今日は10時開始、0時半終了。施術3件で合計11時間。当日予約1件。カルテ40分、未完了2件。清掃と洗濯50分。経理と販促30分。睡眠4時間半。予約を1件断った。設定ミスなし。"
+          ></textarea>
+          <div class="voice-actions">
+            <button id="apply-transcript" class="secondary-button" type="button">文章からフォームへ反映</button>
+            <span id="voice-status" class="status-text" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <form id="daily-form" class="daily-form" novalidate>
+          <input id="record-id" type="hidden" />
+
+          <fieldset>
+            <legend><span>01</span> 基本情報</legend>
+            <div class="form-grid cols-2">
+              <label>
+                記録日
+                <input id="record-date" name="recordDate" type="date" required />
+              </label>
+              <label>
+                営業状況
+                <select id="day-status" name="dayStatus">
+                  <option value="open">営業日</option>
+                  <option value="closed">休業日</option>
+                </select>
+              </label>
+            </div>
+          </fieldset>
+
+          <div id="work-fields">
+            <fieldset>
+              <legend><span>02</span> 営業と施術</legend>
+              <div class="form-grid cols-4">
+                <label>
+                  業務開始
+                  <input id="start-time" name="startTime" type="time" required />
+                </label>
+                <label>
+                  業務終了
+                  <input id="end-time" name="endTime" type="time" required />
+                </label>
+                <label>
+                  施術件数
+                  <span class="input-with-unit"><input id="treatment-count" name="treatmentCount" type="number" min="0" step="1" value="0" required /><span>件</span></span>
+                </label>
+                <label>
+                  施術時間の合計
+                  <span class="input-with-unit"><input id="treatment-minutes" name="treatmentMinutes" type="number" min="0" step="5" value="0" required /><span>分</span></span>
+                </label>
+                <label>
+                  当日予約
+                  <span class="input-with-unit"><input id="same-day-bookings" name="sameDayBookings" type="number" min="0" step="1" value="0" required /><span>件</span></span>
+                </label>
+                <label>
+                  断った予約
+                  <span class="input-with-unit"><input id="declined-bookings" name="declinedBookings" type="number" min="0" step="1" value="0" required /><span>件</span></span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend><span>03</span> 施術外の業務</legend>
+              <div class="form-grid cols-4">
+                <label>
+                  カルテ作成
+                  <span class="input-with-unit"><input id="chart-minutes" name="chartMinutes" type="number" min="0" step="5" value="0" required /><span>分</span></span>
+                </label>
+                <label>
+                  カルテ未完了
+                  <span class="input-with-unit"><input id="unfinished-charts" name="unfinishedCharts" type="number" min="0" step="1" value="0" required /><span>件</span></span>
+                </label>
+                <label>
+                  清掃・洗濯
+                  <span class="input-with-unit"><input id="cleaning-minutes" name="cleaningMinutes" type="number" min="0" step="5" value="0" required /><span>分</span></span>
+                </label>
+                <label>
+                  経理・販促
+                  <span class="input-with-unit"><input id="admin-minutes" name="adminMinutes" type="number" min="0" step="5" value="0" required /><span>分</span></span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend><span>04</span> 予約枠</legend>
+              <div class="choice-block">
+                <span>予約枠の設定ミスはありましたか？</span>
+                <div class="segmented-control">
+                  <label><input type="radio" name="slotError" value="false" checked /><span>なし</span></label>
+                  <label><input type="radio" name="slotError" value="true" /><span>あり</span></label>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+
+          <fieldset>
+            <legend><span>05</span> 睡眠とメモ</legend>
+            <div class="form-grid cols-2">
+              <label>
+                前日の睡眠時間
+                <span class="input-with-unit"><input id="sleep-hours" name="sleepHours" type="number" min="0" max="24" step="0.5" required /><span>時間</span></span>
+              </label>
+              <label>
+                補足（任意）
+                <input id="note" name="note" type="text" maxlength="200" placeholder="予定変更や特別な出来事など" />
+              </label>
+            </div>
+          </fieldset>
+
+          <div id="form-error" class="form-error" role="alert" hidden></div>
+          <div class="form-actions">
+            <button id="cancel-edit" class="text-button" type="button" hidden>編集をキャンセル</button>
+            <button class="primary-button" type="submit">記録を保存</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="dashboard" class="section-block dashboard-section" aria-labelledby="dashboard-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">14-DAY DASHBOARD</p>
+            <h2 id="dashboard-title">14日間の集計</h2>
+          </div>
+          <p id="analysis-period">記録を登録すると集計が表示されます。</p>
+        </div>
+
+        <div id="summary-cards" class="summary-grid" aria-live="polite"></div>
+
+        <div class="chart-grid">
+          <article class="chart-card">
+            <div class="card-heading">
+              <div>
+                <h3>1日の稼働時間</h3>
+                <p>施術と、それ以外の拘束時間</p>
+              </div>
+              <div class="legend"><span class="treatment"></span>施術 <span class="other"></span>その他</div>
+            </div>
+            <div id="work-chart" class="bar-chart empty-state">まだ記録がありません。</div>
+          </article>
+
+          <article class="chart-card">
+            <div class="card-heading">
+              <div>
+                <h3>睡眠時間</h3>
+                <p>日ごとの推移</p>
+              </div>
+            </div>
+            <div id="sleep-chart" class="bar-chart empty-state">まだ記録がありません。</div>
+          </article>
+        </div>
+
+        <article class="insight-card">
+          <div>
+            <p class="eyebrow">CURRENT INSIGHT</p>
+            <h3>現在の傾向</h3>
+          </div>
+          <ul id="insight-list">
+            <li>記録が3日以上たまると、傾向を表示します。</li>
+          </ul>
+        </article>
+      </section>
+
+      <section id="history" class="section-block" aria-labelledby="history-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">HISTORY</p>
+            <h2 id="history-title">記録履歴</h2>
+          </div>
+          <div class="export-actions">
+            <button id="export-csv" class="secondary-button" type="button">CSV出力</button>
+            <button id="print-report" class="secondary-button" type="button">印刷・PDF</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>日付</th>
+                <th>稼働</th>
+                <th>施術</th>
+                <th>当日予約</th>
+                <th>カルテ</th>
+                <th>睡眠</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="history-body">
+              <tr><td class="table-empty" colspan="7">まだ記録がありません。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="data-footer">
+          <p>データはこのブラウザ内に保存されます。端末変更やブラウザデータ削除の前にCSVを出力してください。</p>
+          <button id="clear-data" class="danger-button" type="button">すべての記録を削除</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>業務改善支援 <strong>RUVO</strong></p>
+      <p>このツールには顧客名・健康情報・施術中の会話を入力しないでください。</p>
+    </footer>
+  </body>
+</html>
